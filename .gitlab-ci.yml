@@ -3,6 +3,8 @@ image: vineethvinni/devops_agent:v1
 variable:
   sonar_url: http://3.83.151.11:9000
   sonar_token: ${sonar_token}
+  nexus_release: http://3.83.151.11:8081/repository/cicd/
+  nexus_snapshot: http://3.83.151.11:8081/repository/cicd_snapshot/
 before_script:
   - cd java-maven-sonar-argocd-helm-k8s/sprint-boot-app
 stages:
@@ -22,3 +24,24 @@ sonar_qube:
   stage: sonarqube
   script:
     - mvn sonar:sonar -Dsonarurl=${sonar_url} -Dsonar-token=${sonar_token}
+nexus_deploy:
+  stage: nexus_deploy
+  script:
+    - |
+      echo "<settings>
+        <servers>
+          <server>
+            <id>nexus-releases</id>
+            <username>${NEXUS_USER}</username>
+            <password>${NEXUS_PASSWORD}</password>
+          </server>
+          <server>
+            <id>nexus-snapshots</id>
+            <username>${NEXUS_USER}</username>
+            <password>${NEXUS_PASSWORD}</password>
+          </server>
+        </servers>
+      </settings>" > ci-settings.xml
+    - mvn deploy -s ci-settings.xml -DaltReleaseDeploymentRepository=nexus-releases::default::${NEXUS_RELEASES_URL} -DaltSnapshotDeploymentRepository=nexus-snapshots::default::${NEXUS_SNAPSHOTS_URL}
+  only:
+    - main
