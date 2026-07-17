@@ -1,3 +1,5 @@
+before_script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
 image: vineethvinni/devops_agent:v1
 
 variables:
