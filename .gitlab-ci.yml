@@ -33,7 +33,7 @@ test:
 sonar_qube:
   stage: sonarqube
   script:
-    - mvn sonar:sonar -Dsonarurl=${sonar_url} -Dsonar-token=${sonar_token}
+    - mvn sonar:sonar -Dsonar.host.url=${sonar_url} -Dsonar.token=${sonar_token}
 nexus_deploy:
   stage: nexus_deploy
   script:
