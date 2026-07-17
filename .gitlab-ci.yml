@@ -28,6 +28,9 @@ sonar_qube:
     - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.login=${sonar_token}
 nexus_deploy:
   stage: nexus_deploy
+  dependencies:
+    # This downloads the jar from the build stage
+    - build
   script:
     - |
       echo "<settings>
