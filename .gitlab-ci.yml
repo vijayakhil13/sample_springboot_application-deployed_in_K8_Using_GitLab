@@ -1,6 +1,8 @@
 image: 'abhishekf5/maven-abhishek-docker-agent:v1'
 
 variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ''
   #sonar_url: http://3.83.151.11:9000
   #sonar_token: ${sonar_token}
   NEXUS_RELEASES_URL: http://3.83.151.11:8081/repository/cicd/
@@ -62,6 +64,8 @@ nexus_deploy:
     - main
 docker_build:
   stage: docker_build
+  services:
+    - docker:dind
   dependencies:
     - build
 
