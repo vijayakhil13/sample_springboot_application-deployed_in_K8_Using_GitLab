@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: vineethvinni/cicd:latest
+        image: vineethvinni/cicd:2685888178
         ports:
         - containerPort: 8090
