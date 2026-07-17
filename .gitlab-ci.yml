@@ -5,7 +5,7 @@ variable:
   sonar_token: ${sonar_token}
 before_script:
   - cd java-maven-sonar-argocd-helm-k8s/sprint-boot-app
-stages
+stages:
   - build
   - test
   - sonarqube
