@@ -76,11 +76,10 @@ docker_build:
     - docker push ${IMAGE_NAME}:${IMAGE_TAG}
     #- docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:${IMAGE_TAG}
     #- 'sed -i "s|image: vineethvinni/cicd:latest|image: ${IMAGE_NAME}:${IMAGE_TAG}|g" ../../java-maven-sonar-argocd-helm-k8s/k8/deployment.yaml'
-    - 'sed -i "s|vineethvinni/cicd:latest|${IMAGE_NAME}:${IMAGE_TAG}|g" ../k8/deployment.yaml'
-    - git config --global user.email "ci-runner@gitlab.com"
-    - git config --global user.name "GitLab CI"
-    - git add ../k8/deployment.yaml
-    - git commit -m "chore(deploy): update image tag to ${IMAGE_TAG} [skip ci]"
-    - git push "https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:main
+    - 'git config --global user.email "ci-runner@gitlab.com"'
+    - 'git config --global user.name "GitLab CI"'
+    - 'git add ../k8/deployment.yaml'
+    - 'git commit -m "chore(deploy): update image tag to ${IMAGE_TAG} [skip ci]"'
+    - 'git push "https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:main'
   only:
     - main
