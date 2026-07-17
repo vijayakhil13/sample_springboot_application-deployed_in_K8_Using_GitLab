@@ -5,6 +5,11 @@ variables:
   #sonar_token: ${sonar_token}
   NEXUS_RELEASES_URL: http://3.83.151.11:8081/repository/cicd/
   NEXUS_SNAPSHOTS_URL: http://3.83.151.11:8081/repository/cicd_snapshot/
+  IMAGE_NAME: vineethvinni/cicd
+  IMAGE_TAG: $CI_PIPELINE_ID
+  DOCKERHUB_PASSWORD: ${CI_REGISTRY_PASSWORD}
+  DOCKERHUB_USERNAME: ${CI_REGISTRY_USER}
+
 before_script:
   - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
   - cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
@@ -13,6 +18,7 @@ stages:
   - test
   - sonarqube
   - nexus_deploy
+  - docker_build
 build:
   stage: build
   script:
@@ -52,5 +58,23 @@ nexus_deploy:
         </servers>
       </settings>" > ci-settings.xml
     - mvn deploy -s ci-settings.xml -DaltReleaseDeploymentRepository=nexus-releases::default::${NEXUS_RELEASES_URL} -DaltSnapshotDeploymentRepository=nexus-snapshots::default::${NEXUS_SNAPSHOTS_URL}
+  only:
+    - main
+docker_build:
+  stage: docker_build
+  dependencies:
+    - build
+
+  script:
+    - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+    - docker push ${IMAGE_NAME}:${IMAGE_TAG}
+
+    - docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+
+    - docker push ${IMAGE_NAME}:latest
+
   only:
     - main
