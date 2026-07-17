@@ -74,6 +74,6 @@ docker_build:
     - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker push ${IMAGE_NAME}:${IMAGE_TAG}
     #- docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:${IMAGE_TAG}
-    - sed -i "s|image: vineethvinni/cicd:latest|image: ${IMAGE_NAME}:${IMAGE_TAG}|g" ../../k8s/deployment.yaml
+    - 'sed -i "s|image: vineethvinni/cicd:latest|image: ${IMAGE_NAME}:${IMAGE_TAG}|g" ../../k8s/deployment.yaml'
   only:
     - main
