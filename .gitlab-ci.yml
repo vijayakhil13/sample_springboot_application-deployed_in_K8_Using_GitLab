@@ -2,7 +2,7 @@ image: 'abhishekf5/maven-abhishek-docker-agent:v1'
 
 variables:
   #sonar_url: http://3.83.151.11:9000
-  sonar_token: ${sonar_token}
+  #sonar_token: ${sonar_token}
   NEXUS_RELEASES_URL: http://3.83.151.11:8081/repository/cicd/
   NEXUS_SNAPSHOTS_URL: http://3.83.151.11:8081/repository/cicd_snapshot/
 before_script:
@@ -24,7 +24,8 @@ test:
 sonar_qube:
   stage: sonarqube
   script:
-    - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.token=${sonar_token} -Dsonar.login=${sonar_token}
+  - if [ -z "$sonar_token" ]; then echo "sonar_token is EMPTY"; else echo "sonar_token is SET"; fi
+  - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.token=${sonar_token}
 nexus_deploy:
   stage: nexus_deploy
   script:
