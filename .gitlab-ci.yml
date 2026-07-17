@@ -1,48 +1,24 @@
-image: 'abhishekf5/maven-abhishek-docker-agent:v1'
+image: vineethvinni/devops_agent:v1
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ''
-#  SONAR_HOST_URL: http://54.237.226.245:9000
-#  SONAR_LOGIN: ${SONAR_LOGIN}
-
-# Define the default working directory for the pipeline
+variable:
+  sonar_url: http://3.83.151.11:9000
+  sonar_token: ${sonar_token}
 before_script:
-  - cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-
-stages:   
+  - cd java-maven-sonar-argocd-helm-k8s/sprint-boot-app
+stages
   - build
   - test
-#  - sonarqube
-  - dockerization
-
-build-job:  
+  - sonarqube
+  - docker
+build:
   stage: build
   script:
-    - echo "Compiling the code..."
     - mvn clean package
-
-unit-test-job:  
-  stage: test  
-  script:
-    - echo "Running unit tests... This will take about 60 seconds."
+test:
+  stage: test
+  sript:
     - mvn test
-
-#code-quality-job:  
-#  stage: sonarqube 
-#  script:
-#    - echo "scanning code"
-#    -  mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_LOGIN}
-
-docker:
-  stage: dockerization
-  image: docker:19.03
-  services:
-    - name: docker:dind
-
+sonar_qube:
+  stage: sonarqube
   script:
-    - whoami
-    - docker build -t gitlab-cicd-demo:latest .
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - docker tag gitlab-cicd-demo:latest $DOCKER_USERNAME/gitlab-cicd-demo:latest
-    - docker push $DOCKER_USERNAME/gitlab-cicd-demo:latest
+    - mvn sonar:sonar -Dsonarurl=${sonar_url} -Dsonar-token=${sonar_token}
