@@ -16,7 +16,7 @@ variables:
   NEXUS_SNAPSHOTS_URL: http://3.83.151.11:8081/repository/cicd_snapshot/
 before_script:
   - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
-  - cd sprint-boot-app
+  - cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
 stages:
   - build
   - test
