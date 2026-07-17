@@ -1,15 +1,6 @@
 image: 'abhishekf5/maven-abhishek-docker-agent:v1'
 
 variables:
-  sonar_url: http://3.83.151.11:9000
-  sonar_token: ${sonar_token}
-  NEXUS_RELEASES_URL: http://3.83.151.11:8081/repository/cicd/
-  NEXUS_SNAPSHOTS_URL: http://3.83.151.11:8081/repository/cicd_snapshot/
-before_script:
-  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
-  - cd java-maven-sonar-argocd-helm-k8s/sprint-boot-app/image: 'abhishekf5/maven-abhishek-docker-agent:v1'
-
-variables:
   #sonar_url: http://3.83.151.11:9000
   sonar_token: ${sonar_token}
   NEXUS_RELEASES_URL: http://3.83.151.11:8081/repository/cicd/
@@ -34,45 +25,6 @@ sonar_qube:
   stage: sonarqube
   script:
     - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.token=${sonar_token}
-nexus_deploy:
-  stage: nexus_deploy
-  script:
-    - |
-      echo "<settings>
-        <servers>
-          <server>
-            <id>nexus-releases</id>
-            <username>${NEXUS_USER}</username>
-            <password>${NEXUS_PASSWORD}</password>
-          </server>
-          <server>
-            <id>nexus-snapshots</id>
-            <username>${NEXUS_USER}</username>
-            <password>${NEXUS_PASSWORD}</password>
-          </server>
-        </servers>
-      </settings>" > ci-settings.xml
-    - mvn deploy -s ci-settings.xml -DaltReleaseDeploymentRepository=nexus-releases::default::${NEXUS_RELEASES_URL} -DaltSnapshotDeploymentRepository=nexus-snapshots::default::${NEXUS_SNAPSHOTS_URL}
-  only:
-    - main
-
-stages:
-  - build
-  - test
-  - sonarqube
-  - nexus_deploy
-build:
-  stage: build
-  script:
-    - mvn clean package
-test:
-  stage: test
-  script:
-    - mvn test
-sonar_qube:
-  stage: sonarqube
-  script:
-    - mvn sonar:sonar -Dsonarurl=${sonar_url} -Dsonar-token=${sonar_token}
 nexus_deploy:
   stage: nexus_deploy
   script:
