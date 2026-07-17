@@ -24,8 +24,8 @@ test:
 sonar_qube:
   stage: sonarqube
   script:
-  - if [ -z "$sonar_token" ]; then echo "sonar_token is EMPTY"; else echo "sonar_token is SET"; fi
-  - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.token=${sonar_token}
+    - if [ -z "$sonar_token" ]; then echo "sonar_token is EMPTY"; else echo "sonar_token is SET"; fi
+    - mvn sonar:sonar -Dsonar.host.url=http://3.83.151.11:9000 -Dsonar.login=${sonar_token}
 nexus_deploy:
   stage: nexus_deploy
   script:
