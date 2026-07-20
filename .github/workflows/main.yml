@@ -35,4 +35,4 @@ jobs:
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@v4
       with:
-        directory: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app/targets
+        directory: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app
