@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: ghcr.io/vijayakhil13/sample_springboot_application-deployed_in_K8_Using_GitLab:main-01adbb7
+        image: ghcr.io/vijayakhil13/sample_springboot_application-deployed_in_K8_Using_GitLab:07ddee1
         ports:
         - containerPort: 8090
