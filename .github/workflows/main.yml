@@ -122,7 +122,7 @@ jobs:
         Write-Host "🚀 Tunnelling push deployment commands into WSL context safely..."
         Write-Host "Target Tag Version: $NEW_TAG"
         
-        # FIXED: Directly invokes the wsl executable engine using single quotes to isolate text string parsing
+        # Directly invokes the wsl executable engine using single quotes to isolate text string parsing
         wsl bash -c "kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}"
         wsl bash -c "kubectl rollout status deployment/spring-boot-app"
 
