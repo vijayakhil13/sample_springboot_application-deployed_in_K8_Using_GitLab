@@ -127,7 +127,7 @@ jobs:
         NEW_TAG="main-${SHORT_SHA}"
         
         # Target your specific deployment manifest file (adjust name if it is deployment.yaml)
-        TARGET_FILE="./java-maven-sonar-argocd-helm-k8s/spring-boot-app/k8/deployment.yaml"
+        TARGET_FILE="./java-maven-sonar-argocd-helm-k8s/k8/deployment.yaml"
         
         echo "Updating image tag inside $TARGET_FILE to: $NEW_TAG"
         
