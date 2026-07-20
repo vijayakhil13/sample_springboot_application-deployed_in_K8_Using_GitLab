@@ -1,4 +1,3 @@
-
 name: Java CI/CD with Maven, Docker & K8s
 
 on:
@@ -27,12 +26,10 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # FIXED: Run tests FIRST, then package everything cleanly in a single cycle
     - name: Build and Test with Maven
       run: mvn -B clean package
       working-directory: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app
 
-    # OPTIMIZATION: Only upload the compiled fat JAR file instead of the whole messy target/ directory
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -50,7 +47,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # FIXED: Download the JAR directly into the folder where your Docker context expects it (inside target/)
+    # NEW STEP: Safely lowercases your repository path to satisfy strict container registry standards
+    - name: Convert repository name to lowercase
+      id: downcase
+      run: |
+        echo "image_lower=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
@@ -78,13 +80,10 @@ jobs:
       id: meta-ghcr
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        # FIXED: Feeds the safe lowercase repository string path here
+        images: ${{ env.REGISTRY }}/${{ steps.downcase.outputs.image_lower }}
         tags: |
-          type=ref,event=branch
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=sha,prefix=main-,format=short
 
     - name: Extract metadata (tags, labels) for Docker Hub
       id: meta-docker
@@ -92,69 +91,31 @@ jobs:
       with:
         images: ${{ env.DOCKER_HUB_REGISTRY }}/${{ env.DOCKER_HUB_IMAGE }}
         tags: |
-          type=ref,event=branch
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=sha,prefix=main-,format=short
 
-    # FIXED: Combined build-push configuration to push to BOTH registries at the exact same time efficiently
     - name: Build and push to Registries
       uses: docker/build-push-action@v5
       with:
         context: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app
         push: true
-        # Merges tags from both step metadata actions
         tags: |
           ${{ steps.meta-ghcr.outputs.tags }}
           ${{ steps.meta-docker.outputs.tags }}
         labels: ${{ steps.meta-ghcr.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-  update-manifest:
-    needs: build-and-push-image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Update deployment image tag
-      run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        NEW_TAG="${SHORT_SHA}"
-        
-        # Target your specific deployment manifest file (adjust name if it is deployment.yaml)
-        TARGET_FILE="./java-maven-sonar-argocd-helm-k8s/k8/deployment.yaml"
-        
-        echo "Updating image tag inside $TARGET_FILE to: $NEW_TAG"
-        
-        # Replaces the old image tag sequence with the updated tag string using sed
-        sed -i "s|image: ghcr.io/.*|image: ghcr.io/${{ github.repository }}:${NEW_TAG}|g" $TARGET_FILE
-
-    - name: Commit and push changes to GitHub
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@://github.com"
-        git add .
-        git commit -m "chore: update k8s manifest image tag to main-$(echo ${{ github.sha }} | cut -c1-7) [skip ci]" || exit 0
-        git pull --rebase origin main
-        git push origin main
   deploy-to-local-cluster:
     needs: build-and-push-image
-    # Directs this specific job to run on your laptop via PowerShell instead of the cloud
     runs-on: [self-hosted, Windows]
 
     steps:
     - name: Set active image in Minikube
       shell: powershell
       run: |
-        # Generate the matching short SHA tag string
         $SHORT_SHA = "${{ github.sha }}".SubString(0, 7)
         
-        # FIXED: Synchronize your deployment tags to use the default 'main-sha' layout built by metadata
+        # FIXED: Standardized tag mapping to look for the 'main-XXXXXXX' structure built above
         $NEW_TAG = "main-$SHORT_SHA"
         
         $REPO_NAME = "${{ github.repository }}".ToLower()
@@ -162,7 +123,7 @@ jobs:
         Write-Host "🚀 Executing push deployment directly into your local cluster..."
         Write-Host "Target Tag Version: $NEW_TAG"
         
-        # FIXED: Wrapped variable names in braces ${} to prevent PowerShell colon (InvalidVariableReferenceWithDrive) parser errors
+        # FIXED: Safely isolates variables with braces to avoid InvalidVariableReferenceWithDrive parsing crashes
         kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}
         
         kubectl rollout status deployment/spring-boot-app
