@@ -104,26 +104,28 @@ jobs:
         labels: ${{ steps.meta-ghcr.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
+        
   deploy-to-local-cluster:
-    # Changed dependencies to trigger directly after image verification
     needs: build-and-push-image
     runs-on: [self-hosted, Windows]
 
     steps:
-    - name: Set active image in Minikube
-      shell: powershell
+    - name: Set active image in Minikube via WSL
+      # FIXED: Changed the shell handler from powershell to wsl
+      shell: wsl
       run: |
-        # FIXED: Synchronize your deployment tags to use the default 'main-sha' layout built by docker/metadata
-        $SHORT_SHA = "${{ github.sha }}".SubString(0, 7)
-        $NEW_TAG = "main-$SHORT_SHA"
+        # Generate the matching short SHA tag string
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        NEW_TAG="main-${SHORT_SHA}"
         
-        $REPO_NAME = "${{ github.repository }}".ToLower()
+        # Downcase the image repository name path string
+        REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
         
-        Write-Host "🚀 Executing push deployment directly into your local cluster..."
-        Write-Host "Target Tag Version: $NEW_TAG"
+        echo "🚀 Executing push deployment directly into local Minikube via WSL..."
+        echo "Target Tag Version: ${NEW_TAG}"
         
-        # Applies the lowercase image and prefix match string
-        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/$REPO_NAME`:$NEW_TAG
+        # Run the deployment command inside your working Linux environment context
+        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}
         
+        # Monitor the rolling restart phase status
         kubectl rollout status deployment/spring-boot-app
