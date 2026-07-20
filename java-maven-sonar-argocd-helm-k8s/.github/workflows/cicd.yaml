@@ -1,1 +1,22 @@
-
+job_name: Cicd for java application
+on:
+  push:
+    branch: [ main ]
+on:
+  pull: 
+    branch: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest 
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      run:  
+        cd spring-boot-app
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+        # Optional: Automates local caching of dependencies 
+          cache: 'maven'
