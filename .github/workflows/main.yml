@@ -122,9 +122,8 @@ jobs:
 
     - name: Update deployment image tag
       run: |
-        # Generate the short SHA to match the tag pattern (main-XXXXXXX)
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        NEW_TAG="main-${SHORT_SHA}"
+        NEW_TAG="${SHORT_SHA}"
         
         # Target your specific deployment manifest file (adjust name if it is deployment.yaml)
         TARGET_FILE="./java-maven-sonar-argocd-helm-k8s/k8/deployment.yaml"
