@@ -162,7 +162,7 @@ jobs:
         Write-Host "Target Tag Version: $NEW_TAG"
         
       
-        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/$REPO_NAME:$NEW_TAG
+        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/$REPO_NAME`:$NEW_TAG
         
         kubectl rollout status deployment/spring-boot-app
 
