@@ -108,7 +108,7 @@ jobs:
   deploy-to-local-cluster:
     # Changed dependencies to trigger directly after image verification
     needs: build-and-push-image
-    runs-on: [self-hosted, local-k8s]
+    runs-on: [self-hosted, Windows]
 
     steps:
     - name: Set active image in Minikube
