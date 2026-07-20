@@ -153,16 +153,16 @@ jobs:
       run: |
         # Generate the matching short SHA tag string
         $SHORT_SHA = "${{ github.sha }}".SubString(0, 7)
-        $NEW_TAG = "$SHORT_SHA"
         
-        # Downcase the image repository name string path
+        # FIXED: Synchronize your deployment tags to use the default 'main-sha' layout built by metadata
+        $NEW_TAG = "main-$SHORT_SHA"
+        
         $REPO_NAME = "${{ github.repository }}".ToLower()
         
         Write-Host "🚀 Executing push deployment directly into your local cluster..."
         Write-Host "Target Tag Version: $NEW_TAG"
         
-      
-        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/$REPO_NAME`:$NEW_TAG
+        # FIXED: Wrapped variable names in braces ${} to prevent PowerShell colon (InvalidVariableReferenceWithDrive) parser errors
+        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}
         
         kubectl rollout status deployment/spring-boot-app
-
