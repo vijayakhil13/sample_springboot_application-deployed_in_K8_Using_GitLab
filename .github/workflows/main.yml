@@ -131,7 +131,7 @@ jobs:
         echo "Updating image tag inside $TARGET_FILE to: $NEW_TAG"
         
         # Replaces the old image tag sequence with the updated tag string using sed
-        sed -i "s|image: vineethvinni/.*|image: ghcr.io/${{ github.repository }}:${NEW_TAG}|g" $TARGET_FILE
+        sed -i "s|image: ghcr.io/.*|image: ghcr.io/${{ github.repository }}:${NEW_TAG}|g" $TARGET_FILE
 
     - name: Commit and push changes to GitHub
       run: |
