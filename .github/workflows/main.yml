@@ -110,17 +110,20 @@ jobs:
     runs-on: [self-hosted, Windows]
 
     steps:
-    - name: Set active image in Minikube via Bash
-      # FIXED: Swapped 'wsl' with the built-in validated 'bash' engine keyword
-      shell: bash
+    - name: Set active image in Minikube via WSL Tunnel
+      # FIXED: Reverted back to a safe native PowerShell context to handle Windows file paths perfectly
+      shell: powershell
       run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        NEW_TAG="main-${SHORT_SHA}"
-        REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+        # Generate the matching short SHA tag string
+        $SHORT_SHA = "${{ github.sha }}".SubString(0, 7)
+        $NEW_TAG = "main-$SHORT_SHA"
+        $REPO_NAME = "${{ github.repository }}".ToLower()
         
-        echo "🚀 Executing push deployment directly into local Minikube via Bash..."
-        echo "Target Tag Version: ${NEW_TAG}"
+        Write-Host "🚀 Tunnelling push deployment commands into WSL context safely..."
+        Write-Host "Target Tag Version: $NEW_TAG"
         
-        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}
-        kubectl rollout status deployment/spring-boot-app
+        # FIXED: Directly invokes the wsl executable engine using single quotes to isolate text string parsing
+        wsl bash -c "kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/${REPO_NAME}:${NEW_TAG}"
+        wsl bash -c "kubectl rollout status deployment/spring-boot-app"
+
 
