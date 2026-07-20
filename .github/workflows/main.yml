@@ -145,7 +145,7 @@ jobs:
   deploy-to-local-cluster:
     needs: build-and-push-image
     # Directs this specific job to run on your laptop via PowerShell instead of the cloud
-    runs-on: [self-hosted, local-k8s]
+    runs-on: [self-hosted, Windows]
 
     steps:
     - name: Set active image in Minikube
