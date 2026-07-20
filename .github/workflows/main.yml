@@ -142,4 +142,27 @@ jobs:
         git commit -m "chore: update k8s manifest image tag to main-$(echo ${{ github.sha }} | cut -c1-7) [skip ci]" || exit 0
         git pull --rebase origin main
         git push origin main
+  deploy-to-local-cluster:
+    needs: build-and-push-image
+    # Directs this specific job to run on your laptop via PowerShell instead of the cloud
+    runs-on: [self-hosted, local-k8s]
+
+    steps:
+    - name: Set active image in Minikube
+      shell: powershell
+      run: |
+        # Generate the matching short SHA tag string
+        $SHORT_SHA = "${{ github.sha }}".SubString(0, 7)
+        $NEW_TAG = "$SHORT_SHA"
+        
+        # Downcase the image repository name string path
+        $REPO_NAME = "${{ github.repository }}".ToLower()
+        
+        Write-Host "🚀 Executing push deployment directly into your local cluster..."
+        Write-Host "Target Tag Version: $NEW_TAG"
+        
+      
+        kubectl set image deployment/spring-boot-app spring-boot-app=ghcr.io/$REPO_NAME`:$NEW_TAG
+        
+        kubectl rollout status deployment/spring-boot-app
 
